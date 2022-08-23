@@ -1,7 +1,7 @@
 # MINITALK
 
     About sgnal() syscall :
-    
+    <h5>Declaration :</h5>
      
     We can get the list of signals supported on our unix/linux systeme by using the following command :
     > 
