@@ -1,0 +1,8 @@
+so as i give my client the servers pid and the message to send, it has to first :
+    initialise the sigaction struct by:
+        --> Delevering the handler to the struct
+        --> setting up the sigaction struct's set_mask with sigemptyset()
+        --> adding the flags to the set
+    After this, we reach the pid check phase :
+        --> by sending the signal 0 to the pid that we got from our params
+        --> 
