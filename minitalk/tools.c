@@ -12,7 +12,7 @@ int	ft_strlen(char *str)
 	int	len;
 
 	len = 0;
-	while (*str)
+	while (*str++)
 		len++;
 	return (len);
 }
@@ -48,7 +48,6 @@ int	ft_atoi(const char *str)
 
 void	send_bit(int pid, int bit, int to_pause)
 {
-	// printf("bit is %d\n", bit);
 	if (bit == 0)
 	{
 		if (kill(pid, SIGUSR1) != 0)
@@ -65,7 +64,7 @@ void	send_bit(int pid, int bit, int to_pause)
 			exit(EXIT_FAILURE);
 		}
 	}
-	if (to_pause)
+	if (to_pause != 0)
 		pause();
 }
 
@@ -73,7 +72,6 @@ void	initialise_info(t_client_model	*data)
 {
 	if (data->dont_initialize != 1)
 	{
-		data = malloc(sizeof(t_client_model));
 		data->server_pid = 0;
 		data->msg_lenght = 0;
 		data->message = NULL;
@@ -87,7 +85,7 @@ void	initialise_info(t_client_model	*data)
 void	reset_struct(t_client_model *data)
 {
 	free(data->message);
-	data->message = NULL;
-	data->dont_initialize = 0;
+	data->dont_initialize = 2;
+	initialise_info(data);
 	write(1, "MEMORY IS FREEEEEE!!!\n", 22);
 }

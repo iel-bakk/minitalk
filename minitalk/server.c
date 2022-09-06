@@ -6,11 +6,12 @@
 
 void	lenght_recieved_check(t_client_model *data)
 {
-	if (data->shifts == sizeof(int) * 8 && data->fs_check == 0)
+	if (data->shifts == (sizeof(int) * 8) && data->fs_check == 0)
 	{
 		data->msg_lenght = data->data;
 		data->data = 0;
 		data->fs_check = 1;
+		printf("%d len\n", data->msg_lenght);
 		data->message = (char *)malloc(sizeof(char) * data->msg_lenght + 1);
 		if (!data->message)
 		{
@@ -19,21 +20,26 @@ void	lenght_recieved_check(t_client_model *data)
 		}
 		data->message[data->msg_lenght] = '\0';
 		write(1, "MeSSaGe LengTH ReCieVeD!!\n", 26);
+		data->shifts = 0;
 	}
 }
 
 void	is_message_recived(t_client_model *data, int *i)
 {
+	int pid;
+
 	if (data->shifts == 8 && data->fs_check == 1)
 	{
 		data->message[*i] = data->data;
+		(*i)++;
 		if (data->data == '\0')
 		{
-			write(1, "MessAge RecieVed :\n", 19);
+			pid = data->server_pid;
+			write(1, "MessAge RecieVed : ", 19);
 			ft_putstr(data->message);
 			write(1, "\n", 1);
 			reset_struct(data);
-			kill(data->server_pid, SIGUSR2);
+			send_bit(pid, SIGUSR2, 0);
 		}
 		data->data = 0;
 		data->shifts = 0;
@@ -45,15 +51,15 @@ void	server_handler(int sig, siginfo_t *info, void* secret)
 	static t_client_model	data;
 	static int				i; // static int is by default 0
 
-	usleep(100);
-	initialise_info(&data);
+	usleep(180);
 	(void)secret;
 	(void)info;
 	if (sig == SIGUSR2 && data.fs_check == 0)
-		data.data |= 1 << (((sizeof(int) * 8) - 1) - data.shifts);
+		data.data |= 1 << (((sizeof(int) * 8 - 1)) - data.shifts);
 	else if (sig == SIGUSR2 && data.fs_check == 1)
-		data.data |= 1 << (((sizeof(char) * 8) - 1) - data.shifts);
+		data.data |= 1 << (((sizeof(char) * 8 - 1)) - data.shifts);
 	data.shifts++;
+	ft_putstr("Bit ReciEved :)\n");
 	lenght_recieved_check(&data);
 	is_message_recived(&data, &i);
 	send_bit(info->si_pid, 0, 0);

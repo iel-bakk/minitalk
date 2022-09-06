@@ -17,7 +17,7 @@ void msg(int signal, siginfo_t *info, void *content)
 	}
 }
 
-void	send_char(pid_t pid, char c)
+void	send_char(int pid, char c)
 {
 	int		shift;
 	char	bit;
@@ -31,7 +31,7 @@ void	send_char(pid_t pid, char c)
 	}
 }
 
-void	send_lenght(int	pid, int len)
+void	send_lenght(int	pid, int num)
 {
 	int		shift;
 	char	bit;
@@ -39,7 +39,7 @@ void	send_lenght(int	pid, int len)
 	shift = (sizeof(int) * 8) - 1;
 	while (shift >= 0)
 	{
-		bit = (len >> shift) & 1;
+		bit = (num >> shift) & 1;
 		send_bit(pid, bit, 1);
 		shift--;
 	}
@@ -50,12 +50,10 @@ void	send_msg(t_client_model *data)
 	int	i;
 
 	i = 0;
-	{
-		send_lenght(data->server_pid, data->msg_lenght);
-		while (data->message[i] != '\0')
-			send_char(data->server_pid, data->message[i++]);
-		send_char(data->server_pid, '\0');
-	}
+	send_lenght(data->server_pid, data->msg_lenght);
+	while (data->message[i] != '\0')
+		send_char(data->server_pid, data->message[i++]);
+	send_char(data->server_pid, '\0');
 }
 
 int main(int ac, char **av) // our client takes two params The server's PID and The string to send
@@ -66,23 +64,22 @@ int main(int ac, char **av) // our client takes two params The server's PID and 
 	if (ac != 3)
 	{
 		printf("invalid Arguments !!\n");
+		return (EXIT_FAILURE);
 	}
 	else if (kill(ft_atoi(av[1]), 0) < 0)
 	{
 		printf("ErrOr - PID is invalid!! \n");
 		return (EXIT_FAILURE);
 	}
-	else
-	{
 		initialise_info(&msg_info);
 		sigemptyset(&client_action.sa_mask);
-		client_action.sa_sigaction = &msg;
+		client_action.sa_sigaction = msg;
 		client_action.sa_flags = SA_RESTART;
 		msg_info.server_pid = ft_atoi(av[1]);
 		msg_info.msg_lenght = ft_strlen(av[2]);
+		msg_info.message = av[2];
 		configure_sigaction_signals(&client_action);
 		send_msg(&msg_info);
-	}
 	return (0);
 }
 
