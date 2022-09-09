@@ -38,7 +38,11 @@ void	is_message_recived(t_client_model *data, int *i)
 			write(1, "MessAge RecieVed : ", 19);
 			ft_putstr(data->message);
 			write(1, "\n", 1);
-			reset_struct(data);
+			*i = 0;
+			free(data->message);
+			data->message = NULL;
+			data->fs_check = 0;
+			data->dont_initialize = 0;
 			send_bit(pid, SIGUSR2, 0);
 		}
 		data->data = 0;
@@ -51,7 +55,7 @@ void	server_handler(int sig, siginfo_t *info, void* secret)
 	static t_client_model	data;
 	static int				i; // static int is by default 0
 
-	usleep(180);
+	usleep(50);
 	(void)secret;
 	(void)info;
 	if (sig == SIGUSR2 && data.fs_check == 0)
@@ -59,7 +63,6 @@ void	server_handler(int sig, siginfo_t *info, void* secret)
 	else if (sig == SIGUSR2 && data.fs_check == 1)
 		data.data |= 1 << (((sizeof(char) * 8 - 1)) - data.shifts);
 	data.shifts++;
-	ft_putstr("Bit ReciEved :)\n");
 	lenght_recieved_check(&data);
 	is_message_recived(&data, &i);
 	send_bit(info->si_pid, 0, 0);

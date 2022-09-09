@@ -4,11 +4,11 @@
 // this following code is for the client
 // our clients role is to send signals using the kill () syscall to our server 
 
-void msg(int signal, siginfo_t *info, void *content)
+void msg(int signal)
 {
 	if (signal == SIGUSR1)
 	{
-		ft_putstr("sending... sucsess!!\n");
+		usleep(50);
 	}
 	else if (signal == SIGUSR2)
 	{
@@ -52,7 +52,10 @@ void	send_msg(t_client_model *data)
 	i = 0;
 	send_lenght(data->server_pid, data->msg_lenght);
 	while (data->message[i] != '\0')
+	{
+		// usleep(100);
 		send_char(data->server_pid, data->message[i++]);
+	}
 	send_char(data->server_pid, '\0');
 }
 
@@ -73,7 +76,7 @@ int main(int ac, char **av) // our client takes two params The server's PID and 
 	}
 		initialise_info(&msg_info);
 		sigemptyset(&client_action.sa_mask);
-		client_action.sa_sigaction = msg;
+		client_action.sa_handler = msg;
 		client_action.sa_flags = SA_RESTART;
 		msg_info.server_pid = ft_atoi(av[1]);
 		msg_info.msg_lenght = ft_strlen(av[2]);
